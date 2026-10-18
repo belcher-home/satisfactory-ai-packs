@@ -1,0 +1,103 @@
+{
+  "schema": "mki-roads.icons",
+  "schemaVersion": 2,
+  "generator": "tools/build-tools/src/road-pack-icons.ts",
+  "icons": {
+    "/MKIRoads/Icons/Icon_MKIR_SplineRoad1m.Icon_MKIR_SplineRoad1m": {
+      "key": "spline_road_1m",
+      "size": 512,
+      "rgbaSha256": "6598f8e9ddd94f911f90a900bc05b9bc53e2b7765cf6feeb22d64e8c7877b3be",
+      "coverage": 0.3811,
+      "bounds": [
+        143,
+        35,
+        368,
+        476
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_Pattern_NorthAmericanRoad.Icon_MKIR_Pattern_NorthAmericanRoad": {
+      "key": "road_pattern_200",
+      "size": 512,
+      "rgbaSha256": "523d0ee2c51467a5a87d58bfacb7ac6381255e392900c60abc25b84d43945594",
+      "coverage": 0.1256,
+      "bounds": [
+        12,
+        0,
+        499,
+        511
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_Intersection2Way.Icon_MKIR_Intersection2Way": {
+      "key": "road_junction_2way",
+      "size": 512,
+      "rgbaSha256": "15c7c0ac8a54bef8f3d5e155cec922796c813dd2848134c1002e4279ad5174b0",
+      "coverage": 0.4179,
+      "bounds": [
+        146,
+        146,
+        476,
+        476
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_Intersection3Way.Icon_MKIR_Intersection3Way": {
+      "key": "road_junction_3way",
+      "size": 512,
+      "rgbaSha256": "543c07c119636ea45d11f1e499c03b9da826854171d144638ef19a83f5bebf01",
+      "coverage": 0.5581,
+      "bounds": [
+        35,
+        146,
+        476,
+        476
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_Intersection4Way.Icon_MKIR_Intersection4Way": {
+      "key": "road_junction_4way",
+      "size": 512,
+      "rgbaSha256": "adc69863ba3899f579a6c7aa63b6210914e57dd4f33e5536e4acc67e15fd866a",
+      "coverage": 0.7453,
+      "bounds": [
+        35,
+        35,
+        476,
+        476
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_Turnaround.Icon_MKIR_Turnaround": {
+      "key": "road_turnaround",
+      "size": 512,
+      "rgbaSha256": "0b4d2a40dd07b7c72812e4c93f6d8e59564f12b9af02a9757c27688d70663f17",
+      "coverage": 0.7453,
+      "bounds": [
+        35,
+        35,
+        476,
+        476
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_TruckDepotLarge.Icon_MKIR_TruckDepotLarge": {
+      "key": "road_truck_depot_7",
+      "size": 512,
+      "rgbaSha256": "b7cae886373998f03ef0dc8a12ec2cf82a7febe7b37a29b932592c1578dbe4f8",
+      "coverage": 0.508,
+      "bounds": [
+        35,
+        146,
+        476,
+        476
+      ]
+    },
+    "/MKIRoads/Icons/Icon_MKIR_TruckDepotLargeBoth.Icon_MKIR_TruckDepotLargeBoth": {
+      "key": "road_truck_depot_9",
+      "size": 512,
+      "rgbaSha256": "5b852e2e3d177019eb923422bada1e21f3a05707b7e7564e42105712cb8a0e80",
+      "coverage": 0.6451,
+      "bounds": [
+        35,
+        35,
+        476,
+        476
+      ]
+    }
+  }
+}

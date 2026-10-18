@@ -1,0 +1,22 @@
+Satisfactory MKI Mods
+Copyright (C) 2026 MidKnight Industries
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 of the License. See LICENSE.
+
+Third-party material
+--------------------
+
+Roboto Black glyph outlines
+  The letters A D G I L N O P S T U in
+  mods/MKIRoads/MKIRoads/Source/MKIRoads/Private/MKIRoadLegendGlyphs.generated.h
+  are flattened and triangulated from Roboto-Black.ttf (Copyright 2011 Google Inc.),
+  licensed under the Apache License, Version 2.0:
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Satisfactory, Satisfactory Mod Loader and Unreal Engine
+  The mods compile against the Satisfactory Mod Loader (GPL-3.0) and the game and
+  engine headers distributed for modding. No game, engine or other mod content
+  is included in this repository or in the packaged mods. Satisfactory is a
+  trademark of Coffee Stain Studios; this project is not affiliated with it.

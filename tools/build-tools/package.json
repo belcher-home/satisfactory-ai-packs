@@ -1,0 +1,28 @@
+{
+  "name": "@satisfactory-mki/build-tools",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "description": "Build, package, install and version tooling for the MKI Roads and MKI Bridge plugins",
+  "scripts": {
+    "road-pack": "tsx scripts/road-pack.ts",
+    "road-pack:install": "tsx scripts/road-pack-install.ts",
+    "road-pack:glyphs": "tsx scripts/road-pack-glyphs.ts",
+    "versions": "tsx scripts/project-version.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/road-pack.test.ts test/road-pack-install.test.ts test/road-pack-provenance.test.ts test/project-versions.test.ts test/release-mods.test.ts",
+    "release:mods": "tsx scripts/release-mods.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

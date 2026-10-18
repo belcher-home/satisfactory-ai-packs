@@ -1,0 +1,10 @@
+* text=auto eol=lf
+
+*.dll binary
+*.exe binary
+*.pak binary
+*.pdb binary
+*.sav binary
+*.uasset binary
+*.ucas binary
+*.utoc binary

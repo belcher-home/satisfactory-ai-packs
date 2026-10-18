@@ -1,0 +1,21 @@
+{
+  "name": "satisfactory-mki-mods",
+  "version": "1.0.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "description": "Released Satisfactory mods by MidKnight Industries, with the tools that build them",
+  "workspaces": [
+    "tools/build-tools"
+  ],
+  "scripts": {
+    "road-pack": "npm run road-pack --workspace @satisfactory-mki/build-tools --",
+    "road-pack:install": "npm run road-pack:install --workspace @satisfactory-mki/build-tools --",
+    "road-pack:glyphs": "npm run road-pack:glyphs --workspace @satisfactory-mki/build-tools --",
+    "versions": "npm run versions --workspace @satisfactory-mki/build-tools --",
+    "typecheck": "npm run typecheck --workspace @satisfactory-mki/build-tools",
+    "test": "npm run test --workspace @satisfactory-mki/build-tools"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

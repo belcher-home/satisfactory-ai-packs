@@ -1,0 +1,41 @@
+{
+  "FileVersion": 3,
+  "Version": 4,
+  "VersionName": "0.4.5",
+  "SemVersion": "0.4.5",
+  "GameVersion": ">=502094",
+  "FriendlyName": "MKI Bridge",
+  "Description": "Authenticated localhost control bridge for semantic AI construction tools.",
+  "Category": "Developer Utility",
+  "CreatedBy": "MidKnight Industries",
+  "CanContainContent": true,
+  "IsBetaVersion": true,
+  "IsExperimentalVersion": true,
+  "Installed": false,
+  "BuiltInInitialFeatureState": "Active",
+  "Modules": [
+    {
+      "Name": "MKIBridge",
+      "Type": "Runtime",
+      "LoadingPhase": "PostDefault"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "SML",
+      "Enabled": true,
+      "SemVersion": "^3.12.0"
+    },
+    {
+      "Name": "AbstractInstance",
+      "Enabled": true,
+      "BasePlugin": true
+    },
+    {
+      "Name": "MKIRoads",
+      "Enabled": true,
+      "SemVersion": "^0.8.0"
+    }
+  ],
+  "GameFeature": true
+}

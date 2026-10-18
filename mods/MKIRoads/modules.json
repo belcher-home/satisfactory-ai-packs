@@ -1,0 +1,277 @@
+{
+  "schema": "mki-roads.modules",
+  "schemaVersion": 16,
+  "units": {
+    "length": "cm",
+    "angle": "deg"
+  },
+  "package": {
+    "plugin": "MKIRoads",
+    "version": "0.8.0",
+    "mountPoint": "/MKIRoads/",
+    "nativeModule": {
+      "name": "MKIRoads",
+      "rootModuleParentClass": "/Script/MKIRoads.MKIRoadsGameWorldModule",
+      "evidence": "MKI Roads ships one runtime module: the spline road (AMKIRoadSplineRoad, an AFGBuildableFoundation and IFGSplineBuildableInterface), its build-gun hologram (AMKIRoadSplineRoadHologram, an AFGSplineHologram), the road marking pattern descriptor (UMKIRoadMarkingPattern), and the native parent of the root game-world module (UMKIRoadsGameWorldModule), whose Blueprint registers the schematic. Besides the engine modules (Core, CoreUObject, Engine, EnhancedInput and InputCore for the hologram's Plus/Minus lane input, and the ProceduralMeshComponent plugin for the swept deck), the module depends only on FactoryGame and SML. EnhancedInput and ProceduralMeshComponent are engine plugins, so the .uplugin enables them next to SML (#126). The modular road pieces, their zoop and adjustable holograms, and the seam attachment-point type were removed in 0.7.0 (#180)."
+    },
+    "rootModulePath": "/MKIRoads/RootGameWorld_MKIRoads.RootGameWorld_MKIRoads_C",
+    "schematic": {
+      "path": "/MKIRoads/Schematics/Schematic_MKIR_RoadKit.Schematic_MKIR_RoadKit_C",
+      "displayName": "MKI Roads: Road Kit",
+      "type": "milestone",
+      "techTier": 1
+    },
+    "buildMenu": {
+      "category": {
+        "path": "/MKIRoads/BuildMenu/BC_MKIPacks.BC_MKIPacks_C",
+        "displayName": "MKI Packs",
+        "menuPriority": 100
+      },
+      "subCategories": [
+        {
+          "path": "/MKIRoads/BuildMenu/SC_MKIPacks_Roads.SC_MKIPacks_Roads_C",
+          "displayName": "Roads",
+          "menuPriority": 0
+        },
+        {
+          "path": "/MKIRoads/BuildMenu/SC_MKIPacks_Attachments.SC_MKIPacks_Attachments_C",
+          "displayName": "Attachments",
+          "menuPriority": 1
+        }
+      ],
+      "listing": {
+        "listed": "always",
+        "evidence": "Each spline road entry's descriptor is categorized in MKI Packs > Roads and its recipe has no mMaterialCustomizationRecipe, which the shipped material filter (GetAvailableRecipesForMaterialDescriptorInSubCategory, CL502094) always keeps (see package.materialCustomization)."
+      },
+      "categoryIcon": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/UI/IconDesc_AsphaltFoundation8x4_512.IconDesc_AsphaltFoundation8x4_512",
+      "menuPriority": 90,
+      "icons": {
+        "folder": "/MKIRoads/Icons",
+        "sizePx": 512,
+        "description": "One original icon per spline road entry and road marking pattern, drawn top-down from the deck's lanes, markings, and thickness and tinted with package.asphalt.iconColor (packages/mcp-server/src/road-pack-icons.ts). The import step regenerates them and requires their pixel hashes to equal generated/road-kit.icons.json."
+      }
+    },
+    "asphalt": {
+      "displayName": "Asphalt",
+      "vanillaFoundationRecipe": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/Recipe_Foundation_Asphalt_8x4.Recipe_Foundation_Asphalt_8x4",
+      "swatchGroup": "/Script/FactoryGame.FGSwatchGroup_ConcreteFoundation",
+      "defaultSwatch": "/Game/FactoryGame/Buildable/-Shared/Customization/Swatches/SwatchDesc_Concrete.SwatchDesc_Concrete",
+      "iconColor": "#3c3e42",
+      "evidence": "Roads are asphalt only (#159). Read from the SML starter project (d2162c99, CL502094): the vanilla 8 m x 8 m x 4 m Asphalt foundation (Recipe_Foundation_Asphalt_8x4, 5 Concrete) uses the Concrete-foundation swatch group and SwatchDesc_Concrete, which the spline road buildables keep; the editor verify compares them with the vanilla foundation. How the five-material modular version (Concrete, Coated Concrete, FICSIT, Grip Metal) worked is recorded in the git history (last at a77661e)."
+    },
+    "materialCustomization": {
+      "recipeSource": "none",
+      "evidence": "No road recipe sets mMaterialCustomizationRecipe (#159). The build menu's material filter (GetAvailableRecipesForMaterialDescriptorInSubCategory, CL502094) keeps every recipe without one, so each road is listed under any selected material, and the customizer refuses a material change on a road (UFGCDInvalidCustomizationTarget, seen live with MKI Roads 0.4.0 recipes that set none). Colors and patterns stay: the spline road buildables keep mAllowColoring, mAllowPatterning, and the vanilla Asphalt foundation's swatch group and default swatch."
+    },
+    "markings": {
+      "liftCm": 0.5,
+      "lineWidthCm": 15,
+      "centerGapCm": 15,
+      "edgeInsetCm": 30,
+      "dash": {
+        "lengthCm": 200,
+        "gapCm": 200
+      },
+      "paints": {
+        "yellow": {
+          "material": "/MKIRoads/Materials/M_MKIR_RoadPaint_Yellow.M_MKIR_RoadPaint_Yellow",
+          "color": "#f0b323",
+          "roughness": 0.7
+        },
+        "white": {
+          "material": "/MKIRoads/Materials/M_MKIR_RoadPaint_White.M_MKIR_RoadPaint_White",
+          "color": "#e8e8e2",
+          "roughness": 0.7
+        },
+        "orange": {
+          "material": "/MKIRoads/Materials/M_MKIR_RoadPaint_Orange.M_MKIR_RoadPaint_Orange",
+          "color": "#f39a2e",
+          "roughness": 0.7
+        }
+      },
+      "evidence": "Requested by the maintainer (#159) from North American references: a solid double yellow center line, dashed white lines between lanes of the same direction, and a solid white line along each outside edge. Widths follow common US practice (15 cm lines, 15 cm between the yellow pair); the white edge line sits 30 cm inside the deck edge, clear of the vanilla 1.5 cm top chamfer. Dashes are 2 m with 2 m gaps, so an 8 m stretch holds two whole periods. The road marking pattern (package.splineRoad.patterns) carries these dimensions and the two paint materials, and the spline road draws its lines 0.5 cm above the deck top (no collision, no shadow) so they never z-fight with the deck. The maintainer (#246): depot station pads in the vanilla Full Factory Zone look, orange diagonal stripes on the dark deck; the orange paint draws them."
+    },
+    "splineRoad": {
+      "surfaceMaterial": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/MI_AsphaltFoundation.MI_AsphaltFoundation",
+      "nativeClass": "/Script/MKIRoads.MKIRoadSplineRoad",
+      "hologramClass": "/Script/MKIRoads.MKIRoadSplineRoadHologram",
+      "folder": "/MKIRoads/SplineRoad",
+      "description": "A road laid like railway track: click a start, drag the end, and it follows a straight, a curve, or a grade. Plus and Minus step between 2 and 4 lanes; hold Ctrl for straight mode, as for rail. Costs one asphalt 8x4 foundation per 64 m2 of deck.",
+      "variants": [
+        {
+          "thicknessCm": 100,
+          "stem": "SplineRoad1m",
+          "displayName": "Road"
+        }
+      ],
+      "junctions": {
+        "nativeClass": "/Script/MKIRoads.MKIRoadJunction",
+        "hologramClass": "/Script/MKIRoads.MKIRoadJunctionHologram",
+        "thicknessCm": 100,
+        "description": "A road intersection: a square of the road's width, an 8 m apron on each arm, and the corners between arms cut at 45 degrees, so a path can turn from the outer lane into the nearest lane of the cross road. Plus and Minus step between 2 and 4 lanes; scroll turns it. Aimed at a road end, one arm joins it (scroll picks which); road ends snap to the middle of its arms. Costs one asphalt 8x4 foundation per 64 m2 of deck.",
+        "entries": [
+          {
+            "stem": "Intersection2Way",
+            "displayName": "Intersection (2-way)",
+            "arms": 2
+          },
+          {
+            "stem": "Intersection3Way",
+            "displayName": "Intersection (3-way)",
+            "arms": 3
+          },
+          {
+            "stem": "Intersection4Way",
+            "displayName": "Intersection (4-way)",
+            "arms": 4
+          },
+          {
+            "stem": "Turnaround",
+            "displayName": "Turnaround",
+            "arms": 1,
+            "description": "A road turnaround: a round end that loops each incoming lane back into its outgoing lane, round a painted island. Plus and Minus step between 2 and 4 lanes; aimed at a road end, it joins it, and road ends snap to its arm. Lays its own vehicle paths. Costs one asphalt 8x4 foundation per 64 m2 of deck."
+          },
+          {
+            "stem": "TruckDepotLarge",
+            "displayName": "Truck Depot",
+            "arms": 7,
+            "description": "A 48 m road piece with a truck bay beside its outer lane: traffic pulls off the lane at the piece's end on a 17 m bend, runs 7 m straight into and out of the dock, and rejoins the lane at the other end. Plus and Minus step between 2 and 4 lanes; scroll turns it; road ends join both ends. A vanilla Truck Station or Fluid Truck Station aimed at it snaps onto the nearest dock, its building beside the road, and the paths there then run through the station's dock. Lays its own vehicle paths. Costs one asphalt 8x4 foundation per 64 m2 of deck."
+          },
+          {
+            "stem": "TruckDepotLargeBoth",
+            "displayName": "Truck Depot (Both Sides)",
+            "arms": 9,
+            "description": "A 48 m road piece with a truck bay on each side, one for each direction. Plus and Minus step between 2 and 4 lanes; road ends join both ends. A vanilla Truck Station or Fluid Truck Station aimed at it snaps onto the nearest dock, its building beside the road, and the paths there then run through the station's dock. Lays its own vehicle paths. Costs one asphalt 8x4 foundation per 64 m2 of deck."
+          }
+        ],
+        "evidence": "The maintainer (#227): separate 3-way and 4-way intersections, one build-menu entry each with Plus and Minus for 1, 2, or 4 lanes, shaped as the intersection he built from 8 m foundations and two diagonal ramp corner pieces (measured in the AI Sandbox save, 2026-10-13: the cross roads end 8 m short of the 2-lane stem on each side, the stem 8 m short of the cross road, and an 8 m right triangle fills each inside corner), so a path can make the right turn from the outer lane into the nearest lane of the cross road (about 12 m radius; a plain square leaves about 4 m, and the vanilla path refused it as too sharp). The maintainer (#228): a 2-way intersection as well, a corner for tight turns: the +X arm and the stem with one cut corner. The maintainer (#236): a turnaround using the least space for the end of a 1, 2, or 4 lane road, a loop that takes incoming traffic back round to its outgoing lanes, with road markings. The maintainer (#237): truck depots for 1, 2, and 4 lanes that include the road and paths, added at the end of or along a road, roads joining each end (arms 6 is the depot's shape code: two straight arms and a bay). The maintainer (#239): the 48 m depot was far too big; truck depots should have a small footprint (now 16 m, the dock on the outer lane). The maintainer (#240): a small depot without a bay and a large one with a bay, each also with a depot on both sides of the road, and a depot at the end of a turnaround (a road end, not inline); arms 6-10 are depot shape codes. The maintainer (#250): the turnaround depot is gone (a small depot and a turnaround build it), and the large depot is 56 m, half a foundation longer each end, so its bends merge into the lane 7 m inside each end with 5 m straights into and out of the dock, as his working hand-built depot; arms 6-9 are depot shape codes. The maintainer (#250): the small depot is 24 m, so its dock lane runs 7 m, 5 m straight into the dock, 5 m out, and 7 m. The maintainer (#250, next try): 7 m straight into and out of each station and 17 m bends. The maintainer (#250): 4 m off each end of the large depot (48 m), its paths ending right on the border to the next piece. The maintainer (#251): the small depots are gone (a fluid station on one blocked cargo trucks with no way for a player to see why, and its bypass stacked over the dock lane stopped a truck); the large depot is now just Truck Depot."
+      },
+      "patterns": {
+        "folder": "/MKIRoads/Customization",
+        "nativeClass": "/Script/MKIRoads.MKIRoadMarkingPattern",
+        "recipeBasis": "/Game/FactoryGame/Buildable/-Shared/Customization/Patterns/Arrows/Recipe_Pattern_ArrowLeft.Recipe_Pattern_ArrowLeft",
+        "categoryIcon": "/Game/FactoryGame/Interface/UI/InGame/Customiser/TXUI_Category_Pattern.TXUI_Category_Pattern",
+        "category": {
+          "stem": "MKIPatterns",
+          "displayName": "MKI Patterns",
+          "menuPriority": 10,
+          "parent": "/Game/FactoryGame/Buildable/-Shared/Customization/CC_Pattern.CC_Pattern"
+        },
+        "subCategory": {
+          "stem": "MKIPatterns_Roads",
+          "displayName": "Roads",
+          "menuPriority": 1
+        },
+        "entries": [
+          {
+            "stem": "NorthAmericanRoad",
+            "displayName": "North American Road",
+            "description": "Double solid yellow center line, dashed white lines between lanes of the same direction, and a solid white line along each edge. Drawn by the road itself for its own width (2 or 4 lanes; an odd count from 3 is marked as one lane fewer, each wider), along its curves and grades. MKI Roads roads only.",
+            "id": 200,
+            "layout": "north-american"
+          }
+        ],
+        "evidence": "The maintainer asked for an MKI Patterns group with a Roads subcategory in the build-menu customizer and a North American road pattern first. Vanilla patterns (FGFactoryCustomizationDescriptor_Pattern, read-only from the game 1.2.4.0 IoStore container) carry an ID that the foundation master material uses to pick a stencil texture on UV1, a category (CC_Pattern) and subcategory (CSC_Pattern_*), and a FGCustomizationRecipe produced in the build gun. Their IDs run 1-64 (0 is the remover), so this pattern takes 200. A fixed stencil cannot know a road lane count or follow its curve, so the road draws the lines itself from the pattern descriptor (UMKIRoadMarkingPattern) with the agreed package.markings dimensions, and gives its deck pattern ID 0. The maintainer (#202): in its own MKI Patterns category the customizer drew the pattern as an orange and blue swatch circle, its icon unused; the maintainer kept MKI Patterns, so the MKI Patterns category is a Blueprint child of the vanilla Patterns category (CC_Pattern)."
+      },
+      "subCategory": "/MKIRoads/BuildMenu/SC_MKIPacks_Roads.SC_MKIPacks_Roads_C"
+    },
+    "supports": {
+      "nativeClass": "/Script/MKIRoads.MKIRoadSupports",
+      "hologramClass": "/Script/MKIRoads.MKIRoadSupportsHologram",
+      "folder": "/MKIRoads/Supports",
+      "subCategory": "/MKIRoads/BuildMenu/SC_MKIPacks_Attachments.SC_MKIPacks_Attachments_C",
+      "entries": [
+        {
+          "stem": "SupportsConcrete",
+          "displayName": "Road Support (Concrete)",
+          "description": "Aim at a raised MKI Roads road where you want it held up and click to fix the top of a concrete pillar under it, on 4 m steps along and across the road, so a wide road can stand on several. Then aim where the base should go, at the ground or a foundation (it snaps to them) or along the column, and click again: a pillar base and stacked concrete pillar pieces, in 2 m steps. Place them wherever you like. Dismantling the road removes them. Costs a concrete pillar piece per piece.",
+          "vanillaDescriptor": "/Game/FactoryGame/Buildable/Building/Foundation/Desc_PillarMiddle_Concrete.Desc_PillarMiddle_Concrete",
+          "vanillaRecipe": "/Game/FactoryGame/Recipes/Buildings/Foundations/Recipe_PillarMiddle_Concrete.Recipe_PillarMiddle_Concrete",
+          "baseMesh": "/Game/FactoryGame/Buildable/Building/Pillars/Mesh/SM_Pillar_01.SM_Pillar_01",
+          "middleMesh": "/Game/FactoryGame/Buildable/Building/Pillars/Mesh/SM_Pillar_MiddleConcrete.SM_Pillar_MiddleConcrete"
+        }
+      ],
+      "evidence": "The maintainer (#194): concrete pillars every 24 m under raised roads. Build_PillarBase lays SM_Pillar_01 (8 x 8 x 4 m) and Build_PillarMiddle_Concrete SM_Pillar_MiddleConcrete (4 x 4 x 4 m), both 200 cm below their centered pivots (read from the game paks; live, a base on a foundation topped at z 5200 centers at 5400). Vanilla pillars become lightweight instances once built, so a road could not take real ones with it; MKIRoadSupports lays the meshes by reference, as the barriers do. The maintainer (#199): supports laid every 24 m stood in the lanes of the highway under the overpass, so each column is placed by hand and refused on a road or vehicle path. The maintainer (#200): the player sets the column's length as a zoop (the first click fixes the top, the second the base), and supports and lights step 4 m. The maintainer (#215, #216): the player decides where a support goes, so the on-road, spacing, and ground-gap checks are removed, and the top snaps every 4 m across the road too."
+    },
+    "cost": {
+      "rule": "equivalent-foundation-area",
+      "foundationAreaCm2": 640000,
+      "rounding": "ceil",
+      "description": "A spline road costs, and refunds on dismantle, one vanilla asphalt 8 m x 4 m foundation recipe per started 64 m² of deck: ceil(deck area / 64 m²), so an 8 m two-lane stretch costs 2, the same as the vanilla foundations covering it. The build-menu recipe is one foundation; the hologram (GetBaseCostMultiplier) and the bridge charge it that many times, and the road refunds it that many times (GetDismantleRefundReturnsMultiplier).",
+      "basisRecipe": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/Recipe_Foundation_Asphalt_8x4.Recipe_Foundation_Asphalt_8x4",
+      "perFoundation": [
+        {
+          "item": "/Game/FactoryGame/Resource/Parts/Cement/Desc_Cement.Desc_Cement_C",
+          "amount": 5
+        }
+      ],
+      "sdkEvidence": "Recipe_Foundation_Asphalt_8x4 mIngredients in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094) is 5 Desc_Cement (Concrete). The headless import reads the ingredients from the SDK and fails if they differ from perFoundation.",
+      "dismantleRefund": "built-with-recipe",
+      "dismantleEvidence": "AFGBuildable::GetDismantleRefundReturns refunds UFGRecipe::GetIngredients(mBuiltWithRecipe) times GetDismantleRefundReturnsMultiplier() (SML Source/FactoryGame/Private/Buildables/FGBuildable.cpp). AMKIRoadSplineRoad overrides the multiplier with its equivalent foundations, and the spline road Blueprints implement neither GetDismantleRefund nor GetDismantleBlueprintReturns."
+    },
+    "producedIn": "/Game/FactoryGame/Equipment/BuildGun/BP_BuildGun.BP_BuildGun",
+    "unlockRecipeClass": "/Game/FactoryGame/Unlocks/BP_UnlockRecipe.BP_UnlockRecipe"
+  },
+  "placeholders": [
+    {
+      "path": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/MI_AsphaltFoundation.MI_AsphaltFoundation",
+      "assetType": "MaterialInstanceConstant",
+      "usage": "Base-game asphalt foundation material: the spline road deck (package.splineRoad.surfaceMaterial).",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/Recipe_Foundation_Asphalt_8x4.Recipe_Foundation_Asphalt_8x4",
+      "assetType": "Blueprint",
+      "usage": "Vanilla asphalt 8x4 foundation recipe: the cost basis, and the foundation whose swatch group and default swatch the spline road takes (package.asphalt).",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Buildable/Building/Foundation/AsphaltSet/UI/IconDesc_AsphaltFoundation8x4_512.IconDesc_AsphaltFoundation8x4_512",
+      "assetType": "Texture2D",
+      "usage": "Vanilla asphalt foundation icon, used only for the MKI Packs build category and the schematic. The spline road entries use MKI Roads' own icons.",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Equipment/BuildGun/BP_BuildGun.BP_BuildGun",
+      "assetType": "Blueprint",
+      "usage": "Build gun class that produces building recipes.",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Unlocks/BP_UnlockRecipe.BP_UnlockRecipe",
+      "assetType": "Blueprint",
+      "usage": "Recipe unlock class used by vanilla schematics (the native FGUnlockRecipe is abstract).",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094); Schematic_1-1 mUnlocks holds a BP_UnlockRecipe_C instance."
+    },
+    {
+      "path": "/Game/FactoryGame/Buildable/-Shared/Customization/Swatches/SwatchDesc_Concrete.SwatchDesc_Concrete",
+      "assetType": "Blueprint",
+      "usage": "Default swatch of the vanilla asphalt foundation, which the spline road keeps.",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Buildable/Building/Foundation/Desc_PillarMiddle_Concrete.Desc_PillarMiddle_Concrete",
+      "assetType": "Blueprint",
+      "usage": "Vanilla concrete pillar descriptor: the icons of Road Supports (Concrete).",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Recipes/Buildings/Foundations/Recipe_PillarMiddle_Concrete.Recipe_PillarMiddle_Concrete",
+      "assetType": "Blueprint",
+      "usage": "Vanilla concrete pillar recipe: the cost of Road Supports (Concrete), per piece.",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Buildable/Building/Pillars/Mesh/SM_Pillar_01.SM_Pillar_01",
+      "assetType": "StaticMesh",
+      "usage": "Vanilla pillar base mesh: the foot of each Road Supports column.",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    },
+    {
+      "path": "/Game/FactoryGame/Buildable/Building/Pillars/Mesh/SM_Pillar_MiddleConcrete.SM_Pillar_MiddleConcrete",
+      "assetType": "StaticMesh",
+      "usage": "Vanilla concrete pillar middle mesh: the stacked pieces of each Road Supports column.",
+      "sdkEvidence": "Present in the SML starter project (SatisfactoryModLoader d2162c99, headers CL502094)."
+    }
+  ]
+}

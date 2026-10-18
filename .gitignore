@@ -1,0 +1,8 @@
+node_modules/
+.local/
+**/Binaries/
+**/Intermediate/
+**/Saved/
+*.pdb
+*.sav
+**/token.txt
