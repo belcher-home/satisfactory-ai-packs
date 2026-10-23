@@ -396,6 +396,12 @@ namespace MKIBridgeInternal
     enum class EBuildableFields : uint8 { Compact, Ports, Full };
 
     TSharedRef<FJsonObject> BridgeVectorJson(const FVector& V);
+    /** What an actor (and the component and instance a trace hit) is: class, path, level or world partition cell, bounds, mesh (BridgeWorld.cpp). */
+    TSharedRef<FJsonObject> BridgeActorIdentityJson(const AActor* Actor, const UPrimitiveComponent* HitComponent, int32 Item);
+    /** One primitive component: class, mobility, visibility, collision, bounds, mesh, and its instances (and the one at `Item`). */
+    TSharedRef<FJsonObject> BridgeComponentJson(const UPrimitiveComponent* Component, int32 Item);
+    /** A loaded actor by its exact name, in any level of the world, or null. */
+    AActor* BridgeFindLoadedActor(UWorld* World, const FString& Name);
 
     TSharedRef<FJsonObject> BridgeRotationJson(const FRotator& Rotation);
 

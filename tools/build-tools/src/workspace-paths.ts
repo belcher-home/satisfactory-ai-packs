@@ -38,6 +38,7 @@ export const roadPackUnrealScriptsDirectory = resolve(roadPackDirectory, "unreal
 export const roadKitModulesPath = resolve(roadPackDirectory, "modules.json");
 export const roadKitIconsPath = resolve(roadPackDirectory, "generated", "road-kit.icons.json");
 export const bridgePluginDirectory = resolve(repositoryRoot, "mods", "MKIBridge", "MKIBridge");
+export const toolsPluginDirectory = resolve(repositoryRoot, "mods", "MKITools", "MKITools");
 /** The bridge module's private sources: one translation unit per operation family since #44, plus the shared internals. */
 export const bridgePrivateSourceDirectory = resolve(bridgePluginDirectory, "Source", "MKIBridge", "Private");
 /**

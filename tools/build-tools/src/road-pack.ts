@@ -125,25 +125,34 @@ export function dependencyContractProblems(bridge: PluginDescriptor, roadPack: P
 /**
  * Where each first-party plugin is installed, relative to the game root. Alpakit bakes the plugin's SDK location into
  * its pak and IoStore mount points (`../../../<path>/`), so the installed directory must be exactly that path: MKI
- * Roads is an ordinary mod under `Mods/`, the bridge a game-feature mod under `Mods/GameFeatures/`. A plugin
+ * Roads and MKI Tools are ordinary mods under `Mods/`, the bridge a game-feature mod under `Mods/GameFeatures/`. A plugin
  * installed anywhere else still has its descriptor found, but its content mounts somewhere the plugin does not own.
  */
 export const PLUGIN_INSTALL_PATHS = {
   MKIRoads: "FactoryGame/Mods/MKIRoads",
   MKIBridge: "FactoryGame/Mods/GameFeatures/MKIBridge",
+  MKITools: "FactoryGame/Mods/MKITools",
 } as const;
 export type InstallablePlugin = keyof typeof PLUGIN_INSTALL_PATHS;
 export const isInstallablePlugin = (name: string): name is InstallablePlugin => Object.hasOwn(PLUGIN_INSTALL_PATHS, name);
 /** The container mount root a packaged plugin must use: `../../../FactoryGame/Mods/MKIRoads/`. */
 export const pluginMountRoot = (plugin: InstallablePlugin) => `../../../${PLUGIN_INSTALL_PATHS[plugin]}/`;
 
-/** The pak and IoStore mount points named in `UnrealPak -List` output, `/`-terminated. */
+/**
+ * The pak and IoStore mount points named in `UnrealPak -List` output, `/`-terminated. An IoStore container that holds no
+ * asset, only its `<ContainerHeader>` (a plugin without content, as MKI Tools), lists its mount point as `/`; it mounts
+ * nothing, so it is left out.
+ */
 export function containerMountPoints(listing: readonly string[]): string[] {
   const mounts = new Set<string>();
+  let pending: string | undefined, entries = 0;
+  const settle = () => { if (pending !== undefined && !(pending === "/" && entries === 0)) mounts.add(pending); pending = undefined; entries = 0; };
   for (const line of listing) {
     const mounted = /mount point "?([^"\s]+)"?/i.exec(line)?.[1];
-    if (mounted) mounts.add(mounted.endsWith("/") ? mounted : `${mounted}/`);
+    if (mounted) { settle(); pending = mounted.endsWith("/") ? mounted : `${mounted}/`; continue; }
+    if (/"[^"]+" offset:/.test(line) && !line.includes('"<ContainerHeader>"')) entries++;
   }
+  settle();
   return [...mounts];
 }
 

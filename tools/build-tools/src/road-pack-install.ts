@@ -36,6 +36,8 @@ import {
 const sha256 = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");
 const slash = (path: string) => path.replaceAll("\\", "/");
 const stamp = () => new Date().toISOString().replace(/[-:]/g, "").replace(/\..*/, "").replace("T", "-");
+/** First-party plugins an installation may leave out: MKI Tools stands alone, and neither other plugin requires it. */
+export const OPTIONAL_PLUGINS: readonly InstallablePlugin[] = ["MKITools"];
 
 export interface FileHash { path: string; sha256: string }
 
@@ -298,7 +300,8 @@ export function inspectInstallation(gameRoot: string, artifacts: readonly Verifi
       const fix = present ? "remove that copy" : `move it to ${expectedPath}`, unsafe = removalProblems(root, location, plugin);
       problems.push(`${plugin} is installed at ${location}, but its containers mount at ../../../${expectedPath}/; ${fix} (${unsafe.length === 0 ? "npm run road-pack:install -- install does this with a backup" : `by hand: ${unsafe.join("; ")}`})`);
     }
-    if (!present) { if (misplaced.length === 0) problems.push(`${plugin} is not installed at ${expectedPath}`); continue; }
+    // MKI Tools stands alone: nothing requires it, so an installation without it is complete.
+    if (!present) { if (misplaced.length === 0 && !OPTIONAL_PLUGINS.includes(plugin)) problems.push(`${plugin} is not installed at ${expectedPath}`); continue; }
     const descriptor = readPluginDescriptor(join(directory, `${plugin}.uplugin`));
     descriptors[plugin] = descriptor;
     status.version = descriptor.SemVersion;

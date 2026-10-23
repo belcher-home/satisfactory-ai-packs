@@ -42,7 +42,14 @@ const packageSchema = z.object({
   }).strict(),
   rootModulePath: projectClassPath,
   /** The MKI Roads milestone: it unlocks every spline road and road pattern recipe. */
-  schematic: z.object({ path: projectClassPath, displayName: z.string().min(1), type: z.enum(["milestone", "custom"]), techTier: z.number().int().min(0) }).strict(),
+  schematic: z.object({
+    path: projectClassPath, displayName: z.string().min(1), type: z.enum(["milestone", "custom"]), techTier: z.number().int().min(0),
+    /** What the HUB charges to complete it. */
+    cost: z.array(z.object({ item: baseGameClassPath, amount: z.number().int().positive() }).strict()),
+    /** The vanilla milestone, found by display name in this folder, whose build time it takes (and whose tier it must share). */
+    timeLike: z.object({ folder: z.string().startsWith("/Game/FactoryGame/"), displayName: z.string().min(1) }).strict(),
+    evidence: z.string().min(1),
+  }).strict(),
   /** The project-owned build-menu category and its subcategories (the spline roads name theirs, package.splineRoad.subCategory). */
   buildMenu: z.object({
     category: z.object({ path: projectClassPath, displayName: z.string().min(1), menuPriority: z.number() }).strict(),

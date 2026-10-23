@@ -84,6 +84,12 @@ void FMKIBridgeModule::StartupModule()
     BindBridgeRoute(TEXT("/v1/site-survey"), EHttpServerRequestVerbs::VERB_POST, &M::HandleValidatePlacement, Read(TEXT("/v1/site-survey")));
     BindBridgeRoute(TEXT("/v1/region/loaded"), EHttpServerRequestVerbs::VERB_GET, &M::HandleRegionLoaded, Read(TEXT("/v1/region/loaded")));
     BindBridgeRoute(TEXT("/v1/terrain/column-probe"), EHttpServerRequestVerbs::VERB_POST, &M::HandleColumnProbe, Read(TEXT("/v1/terrain/column-probe")));
+    BindBridgeRoute(TEXT("/v1/world/actor"), EHttpServerRequestVerbs::VERB_GET, &M::HandleWorldActor, Read(TEXT("/v1/world/actor")));
+    BindBridgeRoute(TEXT("/v1/world/static-meshes"), EHttpServerRequestVerbs::VERB_POST, &M::HandleStaticMeshSearch, Read(TEXT("/v1/world/static-meshes")));
+    // MKI Tools' Terrain dismantle mode, for the AI: the removed rocks, and removing or restoring one by name.
+    BindBridgeRoute(TEXT("/v1/terrain/removed-rocks"), EHttpServerRequestVerbs::VERB_GET, &M::HandleTerrainRemovedRocks, Read(TEXT("/v1/terrain/removed-rocks")));
+    BindBridgeRoute(TEXT("/v1/terrain/remove-rock"), EHttpServerRequestVerbs::VERB_POST, &M::HandleTerrainRemoveRock, Mutation(TEXT("/v1/terrain/remove-rock"), false));
+    BindBridgeRoute(TEXT("/v1/terrain/restore-rock"), EHttpServerRequestVerbs::VERB_POST, &M::HandleTerrainRestoreRock, Mutation(TEXT("/v1/terrain/restore-rock"), false));
     BindBridgeRoute(TEXT("/v1/hologram-probe"), EHttpServerRequestVerbs::VERB_POST, &M::HandleHologramProbe, Read(TEXT("/v1/hologram-probe")));
     BindBridgeRoute(TEXT("/v1/conveyors"), EHttpServerRequestVerbs::VERB_GET, &M::HandleConveyors, Read(TEXT("/v1/conveyors")));
     BindBridgeRoute(TEXT("/v1/machines"), EHttpServerRequestVerbs::VERB_GET, &M::HandleMachines, Read(TEXT("/v1/machines")));

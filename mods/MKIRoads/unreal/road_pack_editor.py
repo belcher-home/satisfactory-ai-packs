@@ -134,6 +134,32 @@ def manifest_basis_ingredients():
     return [(item["item"], int(item["amount"])) for item in COST["perFoundation"]]
 
 
+def milestone_cost():
+    return [(item["item"], int(item["amount"])) for item in PACKAGE["schematic"]["cost"]]
+
+
+def time_like_milestone():
+    """The vanilla milestone whose build time MKI Roads takes (package.schematic.timeLike), found by display name; it must
+    share the MKI Roads tech tier, so a renamed or moved vanilla milestone fails the import instead of being guessed."""
+    settings = PACKAGE["schematic"]["timeLike"]
+    names = []
+    for asset in unreal.EditorAssetLibrary.list_assets(settings["folder"], recursive=True, include_folder=False):
+        name = asset.split("/")[-1].split(".")[0]
+        if not name.startswith("Schematic_"):
+            continue
+        generated = unreal.load_object(None, "%s/%s.%s_C" % (asset.rsplit("/", 1)[0], name, name))
+        defaults = defaults_of(generated) if generated else None
+        if not isinstance(defaults, unreal.FGSchematic):
+            continue
+        display = str(defaults.get_editor_property("mDisplayName"))
+        names.append(display)
+        if display == settings["displayName"]:
+            if defaults.get_editor_property("mTechTier") != PACKAGE["schematic"]["techTier"]:
+                raise RuntimeError("%s is tier %s, not package.schematic.techTier %s" % (display, defaults.get_editor_property("mTechTier"), PACKAGE["schematic"]["techTier"]))
+            return defaults
+    raise RuntimeError("No vanilla milestone named %r in %s (found %s)" % (settings["displayName"], settings["folder"], ", ".join(sorted(names))))
+
+
 def brush(texture_path):
     icon = load_object(texture_path)
     value = unreal.SlateBrush()
@@ -486,8 +512,8 @@ def build_registration(recipes):
     defaults.set_editor_property("mType", unreal.SchematicType.EST_MILESTONE if schematic_settings["type"] == "milestone" else unreal.SchematicType.EST_CUSTOM)
     defaults.set_editor_property("mTechTier", int(schematic_settings["techTier"]))
     defaults.set_editor_property("mDisplayName", text(schematic_settings["displayName"]))
-    defaults.set_editor_property("mCost", [])
-    defaults.set_editor_property("mTimeToComplete", 1.0)
+    defaults.set_editor_property("mCost", [unreal.ItemAmount(item_class=load_class(item), amount=amount) for item, amount in milestone_cost()])
+    defaults.set_editor_property("mTimeToComplete", float(time_like_milestone().get_editor_property("mTimeToComplete")))
     defaults.set_editor_property("mUnlocks", [unlock])
     # The HUB needs an icon to show a milestone's unlocks; reuse the vanilla asphalt foundation icon by reference.
     defaults.set_editor_property("mSchematicIcon", brush(MENU["categoryIcon"]))
@@ -626,8 +652,11 @@ def verify_registration_chain():
         for schematic in list(root.get_editor_property("mSchematics")):
             schematic_defaults = defaults_of(schematic)
             check(isinstance(schematic_defaults, unreal.FGSchematic) and path_of(schematic).startswith(MOUNT + "/") and enum_name(schematic_defaults.get_editor_property("mType")) == "EST_MILESTONE"
-                  and schematic_defaults.get_editor_property("mTechTier") == PACKAGE["schematic"]["techTier"] and len(schematic_defaults.get_editor_property("mCost")) == 0,
-                  "%s is a free tier %s MKI Roads milestone" % (asset_name(path_of(schematic)), schematic_defaults.get_editor_property("mTechTier")))
+                  and schematic_defaults.get_editor_property("mTechTier") == PACKAGE["schematic"]["techTier"]
+                  and [(path_of(item.get_editor_property("item_class")), int(item.get_editor_property("amount"))) for item in schematic_defaults.get_editor_property("mCost")] == milestone_cost()
+                  and str(schematic_defaults.get_editor_property("mDisplayName")) == PACKAGE["schematic"]["displayName"]
+                  and schematic_defaults.get_editor_property("mTimeToComplete") == time_like_milestone().get_editor_property("mTimeToComplete"),
+                  "%s is the tier %s MKI Roads milestone %r, costing %s, built in %s s like %s" % (asset_name(path_of(schematic)), schematic_defaults.get_editor_property("mTechTier"), PACKAGE["schematic"]["displayName"], milestone_cost(), schematic_defaults.get_editor_property("mTimeToComplete"), PACKAGE["schematic"]["timeLike"]["displayName"]))
             unlocks = [unlock for unlock in schematic_defaults.get_editor_property("mUnlocks") if isinstance(unlock, unreal.FGUnlockRecipe)]
             for recipe in [recipe for unlock in unlocks for recipe in unlock.get_editor_property("mRecipes")]:
                 products = defaults_of(recipe).get_editor_property("mProduct")

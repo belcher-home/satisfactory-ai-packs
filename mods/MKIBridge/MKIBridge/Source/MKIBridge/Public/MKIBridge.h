@@ -90,6 +90,13 @@ private:
     bool HandleDockingStation(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
     bool HandleInventoryTransfer(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
     bool HandleInventories(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+    /** World identity and the MKI Tools terrain routes (BridgeWorld.cpp). */
+    bool HandleWorldActor(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+    bool HandleStaticMeshSearch(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+    bool HandleTerrainRemovedRocks(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+    bool HandleTerrainRemoveRock(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+    bool HandleTerrainRestoreRock(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete);
+    bool HandleTerrainRocks(const FHttpServerRequest& Request, const FHttpResultCallback& OnComplete, const TCHAR* Action);
     /** Appends an event, starting a new epoch first when the world changed, and answers any waiter it satisfies. */
     void EmitBridgeEvent(UWorld* World, const TCHAR* Type, const TSharedRef<FJsonObject>& Data);
     /** Starts a new event epoch when the play world changed; waiters of the old epoch are answered with resync. */

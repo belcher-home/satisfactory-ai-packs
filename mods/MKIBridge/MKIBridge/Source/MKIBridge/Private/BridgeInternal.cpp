@@ -1,4 +1,5 @@
 #include "BridgeInternal.h"
+#include "Engine/Level.h"
 #include "Components/SplineComponent.h"
 #include "Buildables/FGBuildablePole.h"
 #include "FGFactoryLegsComponent.h"
@@ -483,6 +484,7 @@ namespace MKIBridgeInternal
             TEXT("batch"), TEXT("machine_state"), TEXT("power_circuits"), TEXT("player_inventory"), TEXT("catalog"), TEXT("progression"), TEXT("resource_nodes_v2"),
             TEXT("events"), TEXT("persistent_receipts"), TEXT("terrain_column_probe"), TEXT("player_safety"), TEXT("hologram_probe"), TEXT("vehicles"),
             TEXT("vehicle_path_validation"), TEXT("build_receipts"), TEXT("region_loaded"), TEXT("conveyor_contents"), TEXT("game_rules"), TEXT("machine_clock"), TEXT("rail_to_point"), TEXT("spline_geometry"), TEXT("splitter_rules"), TEXT("blueprint_place"),
+            TEXT("world_identity"), TEXT("terrain_rocks"),
         };
         return Features;
     }
@@ -862,5 +864,87 @@ namespace MKIBridgeInternal
             : (Manufacturer && !Manufacturer->GetCurrentRecipe()) ? TEXT("idle")
             : (Manufacturer && !bInputsPresent) ? TEXT("input_starved")
             : Manufacturer ? TEXT("output_blocked") : TEXT("idle");
+    }
+}
+
+// World identity helpers (BridgeWorld.cpp's routes and the column probe's includeIdentity).
+namespace MKIBridgeInternal
+{
+    TSharedRef<FJsonObject> BridgeBoxJson(const FBox& Box)
+    {
+        const TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+        O->SetObjectField(TEXT("min"), BridgeVectorJson(Box.Min)); O->SetObjectField(TEXT("max"), BridgeVectorJson(Box.Max));
+        O->SetObjectField(TEXT("size"), BridgeVectorJson(Box.GetSize()));
+        return O;
+    }
+
+    TSharedRef<FJsonObject> BridgeLevelJson(const AActor* Actor)
+    {
+        const TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+        const ULevel* Level = Actor ? Actor->GetLevel() : nullptr;
+        if (!Level) { O->SetBoolField(TEXT("loaded"), false); return O; }
+        // A world partition runtime cell is its own level, named after the cell (MainGrid_L0_X.._Y.._DL0); a level in the
+        // persistent world is not streamed.
+        O->SetStringField(TEXT("name"), Level->GetOuter() ? Level->GetOuter()->GetName() : FString());
+        O->SetStringField(TEXT("package"), Level->GetOutermost()->GetName());
+        O->SetBoolField(TEXT("persistent"), Level->IsPersistentLevel());
+        O->SetBoolField(TEXT("worldPartitionCell"), Level->IsWorldPartitionRuntimeCell());
+        return O;
+    }
+
+    TSharedRef<FJsonObject> BridgeComponentJson(const UPrimitiveComponent* Component, int32 Item)
+    {
+        const TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+        O->SetStringField(TEXT("name"), Component->GetName());
+        O->SetStringField(TEXT("class"), Component->GetClass()->GetName());
+        O->SetStringField(TEXT("mobility"), Component->Mobility == EComponentMobility::Static ? TEXT("static") : Component->Mobility == EComponentMobility::Stationary ? TEXT("stationary") : TEXT("movable"));
+        O->SetBoolField(TEXT("visible"), Component->IsVisible() && !Component->bHiddenInGame);
+        O->SetStringField(TEXT("collision"), Component->IsCollisionEnabled() ? TEXT("enabled") : TEXT("disabled"));
+        O->SetObjectField(TEXT("bounds"), BridgeBoxJson(Component->Bounds.GetBox()));
+        if (const UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(Component))
+        {
+            if (Mesh->GetStaticMesh()) O->SetStringField(TEXT("mesh"), Mesh->GetStaticMesh()->GetPathName());
+        }
+        if (const UInstancedStaticMeshComponent* Instanced = Cast<UInstancedStaticMeshComponent>(Component))
+        {
+            O->SetBoolField(TEXT("instanced"), true);
+            O->SetNumberField(TEXT("instanceCount"), Instanced->GetInstanceCount());
+            FTransform Instance;
+            if (Item != INDEX_NONE && Instanced->GetInstanceTransform(Item, Instance, true))
+            {
+                O->SetNumberField(TEXT("instanceIndex"), Item);
+                O->SetObjectField(TEXT("instanceLocation"), BridgeVectorJson(Instance.GetLocation()));
+                O->SetObjectField(TEXT("instanceScale"), BridgeVectorJson(Instance.GetScale3D()));
+            }
+        }
+        return O;
+    }
+
+    TSharedRef<FJsonObject> BridgeActorIdentityJson(const AActor* Actor, const UPrimitiveComponent* HitComponent, int32 Item)
+    {
+        const TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+        O->SetStringField(TEXT("actorName"), Actor->GetName());
+        O->SetStringField(TEXT("actorClass"), Actor->GetClass()->GetName());
+        O->SetStringField(TEXT("actorClassPath"), Actor->GetClass()->GetPathName());
+        O->SetStringField(TEXT("actorPath"), Actor->GetPathName());
+        O->SetBoolField(TEXT("levelPlaced"), Actor->HasAnyFlags(RF_WasLoaded) || Actor->IsNetStartupActor());
+        O->SetBoolField(TEXT("hidden"), Actor->IsHidden());
+        O->SetBoolField(TEXT("collision"), Actor->GetActorEnableCollision());
+        O->SetBoolField(TEXT("hlod"), Actor->GetClass()->GetName().Contains(TEXT("WorldPartitionHLOD")));
+        O->SetObjectField(TEXT("level"), BridgeLevelJson(Actor));
+        // Foliage and HLOD actors span far more than any one instance; the hit component's bounds say more for them.
+        O->SetObjectField(TEXT("bounds"), BridgeBoxJson(Actor->GetComponentsBoundingBox(true)));
+        if (HitComponent) O->SetObjectField(TEXT("component"), BridgeComponentJson(HitComponent, Item));
+        return O;
+    }
+
+    AActor* BridgeFindLoadedActor(UWorld* World, const FString& Name)
+    {
+        for (const ULevel* Level : World->GetLevels())
+        {
+            if (!Level) continue;
+            for (AActor* Actor : Level->Actors) if (Actor && !Actor->IsActorBeingDestroyed() && Actor->GetName().Equals(Name, ESearchCase::CaseSensitive)) return Actor;
+        }
+        return nullptr;
     }
 }

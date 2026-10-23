@@ -6,21 +6,22 @@ Satisfactory mods by **MidKnight Industries**. Each release of a mod is one comm
 
 | Mod | Version | What it is | Source |
 | --- | --- | --- | --- |
-| **MKI Roads** (`MKIRoads`) | 0.8.0 | Asphalt roads laid like railway track: curves, grades, intersections, a turnaround, truck depots, road supports, lane markings and vehicle paths. Usable on its own. | [mods/MKIRoads](mods/MKIRoads/README.md) |
-| **MKI Bridge** (`MKIBridge`) | 0.4.5 | A local, token-protected HTTP bridge that lets an AI assistant observe and build in your world. It requires MKI Roads. | [mods/MKIBridge](mods/MKIBridge/README.md) |
+| **MKI Roads** (`MKIRoads`) | 0.8.1 | Asphalt roads laid like railway track: curves, grades, intersections, a turnaround, truck depots, road supports, lane markings and vehicle paths. Usable on its own. | [mods/MKIRoads](mods/MKIRoads/README.md) |
+| **MKI Bridge** (`MKIBridge`) | 0.4.6 | A local, token-protected HTTP bridge that lets an AI assistant observe and build in your world. It requires MKI Roads. | [mods/MKIBridge](mods/MKIBridge/README.md) |
+| **MKI Tools** (`MKITools`) | 0.3.0 | Quality-of-life tools: a Terrain dismantle mode for level rocks and arches, hold-E auto pickup, and options under Mods > MKI Tools (chainsaw boulders and clearance radius, hand crafting and mining multipliers, health regeneration, a movement speed bonus, extra inventory slots, collecting nearby items, short conveyor lifts, vegetation regrowth). Usable on its own. | [mods/MKITools](mods/MKITools/README.md) |
 
 Players install the mods through [Satisfactory Mod Manager](https://ficsit.app). This repository is for people who want to read or build the code.
 
 ## Building
 
-Both mods are SML 3.12 plugins for Satisfactory CL502094, built with Coffee Stain's Unreal Engine 5.6.1-CSS on Windows (Visual Studio 2022, MSVC 14.38). Set up the SML development checkout and its engine as the [SML modding documentation](https://docs.ficsit.app/) describes, then, from this repository:
+The mods are SML 3.12 plugins for Satisfactory CL502094, built with Coffee Stain's Unreal Engine 5.6.1-CSS on Windows (Visual Studio 2022, MSVC 14.38). Set up the SML development checkout and its engine as the [SML modding documentation](https://docs.ficsit.app/) describes, then, from this repository:
 
 ```sh
 npm install
-npm run road-pack -- sync        # mirror both plugins into <SML_ROOT>/Mods
-npm run road-pack -- editor      # compile both native modules for the SDK editor
+npm run road-pack -- sync        # mirror the plugins into <SML_ROOT>/Mods
+npm run road-pack -- editor      # compile the native modules for the SDK editor
 npm run road-pack -- import      # generate and verify MKI Roads' Unreal content in a headless editor
-npm run road-pack -- package     # Shipping archives for both plugins, verified
+npm run road-pack -- package     # Shipping archives for the plugins, verified
 ```
 
 Set `SML_ROOT` and `UE_ROOT` when your checkout and engine are not at the defaults (`D:/SatisfactoryModding/SatisfactoryModLoader`, `D:/DevTools/UnrealEngine-CSS`). `package` refuses a dirty tree. `npm run road-pack:install -- install --game <Satisfactory root>` installs the packages it just built, with a backup, and `restore` undoes it. The [MKI Roads README](mods/MKIRoads/README.md#workflow) has every step in detail.
@@ -37,6 +38,7 @@ The bridge also needs two small editor-created assets this repository does not h
 
 - `mods/MKIRoads`: MKI Roads' plugin source, its content manifest and icon golden, and the editor script that builds its content.
 - `mods/MKIBridge`: MKI Bridge's plugin source.
+- `mods/MKITools`: MKI Tools' plugin source.
 - `tools/build-tools`: the build, packaging, install and versioning tools for the mods, and their tests. The MCP server that talks to the bridge is a separate project.
 
 A new mod gets its own folder under `mods/`.
@@ -47,4 +49,4 @@ A new mod gets its own folder under `mods/`.
 
 ## License
 
-GPL-3.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Both mods link Satisfactory Mod Loader, which is GPL-3.0.
+GPL-3.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). The mods link Satisfactory Mod Loader, which is GPL-3.0.

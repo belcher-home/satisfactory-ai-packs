@@ -4,6 +4,7 @@
  *
  * - **bridge**: MKI Bridge. Source: its descriptor's `SemVersion` (the mod reads its own descriptor at runtime
  *   and SML mod managers read it in the archive); copy: the descriptor's `VersionName`.
+ * - **tools**: MKI Tools. Source: its descriptor's `SemVersion`; copy: the descriptor's `VersionName`.
  * - **roadPack**: MKI Roads. Source: `modules.json` `package.version`; copies: its descriptor's `SemVersion` and
  *   `VersionName`, and the version the MKI Roads README states.
  *
@@ -27,6 +28,10 @@ export const VERSIONED_PRODUCTS = {
   bridge: {
     source: { kind: "json", file: "mods/MKIBridge/MKIBridge/MKIBridge.uplugin", path: ["SemVersion"] },
     copies: [{ kind: "json", file: "mods/MKIBridge/MKIBridge/MKIBridge.uplugin", path: ["VersionName"] }],
+  },
+  tools: {
+    source: { kind: "json", file: "mods/MKITools/MKITools/MKITools.uplugin", path: ["SemVersion"] },
+    copies: [{ kind: "json", file: "mods/MKITools/MKITools/MKITools.uplugin", path: ["VersionName"] }],
   },
   roadPack: {
     source: { kind: "json", file: "mods/MKIRoads/modules.json", path: ["package", "version"] },

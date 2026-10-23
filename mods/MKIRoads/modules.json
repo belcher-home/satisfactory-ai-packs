@@ -7,7 +7,7 @@
   },
   "package": {
     "plugin": "MKIRoads",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "mountPoint": "/MKIRoads/",
     "nativeModule": {
       "name": "MKIRoads",
@@ -17,9 +17,28 @@
     "rootModulePath": "/MKIRoads/RootGameWorld_MKIRoads.RootGameWorld_MKIRoads_C",
     "schematic": {
       "path": "/MKIRoads/Schematics/Schematic_MKIR_RoadKit.Schematic_MKIR_RoadKit_C",
-      "displayName": "MKI Roads: Road Kit",
+      "displayName": "MKI Roads",
       "type": "milestone",
-      "techTier": 1
+      "techTier": 3,
+      "cost": [
+        {
+          "item": "/Game/FactoryGame/Resource/Parts/Cement/Desc_Cement.Desc_Cement_C",
+          "amount": 400
+        },
+        {
+          "item": "/Game/FactoryGame/Resource/Parts/IronPlateReinforced/Desc_IronPlateReinforced.Desc_IronPlateReinforced_C",
+          "amount": 100
+        },
+        {
+          "item": "/Game/FactoryGame/Resource/Parts/ModularFrame/Desc_ModularFrame.Desc_ModularFrame_C",
+          "amount": 50
+        }
+      ],
+      "timeLike": {
+        "folder": "/Game/FactoryGame/Schematics/Progression",
+        "displayName": "Vehicular Transport"
+      },
+      "evidence": "The maintainer (2026-10-20): the milestone is called MKI Roads, unlocks in Tier 3 beside the vanilla Vehicular Transport milestone, and costs 400 Concrete, 100 Reinforced Iron Plate and 50 Modular Frame. Its build time is Vehicular Transport's: the headless import finds that vanilla milestone by display name in timeLike.folder, takes its mTimeToComplete, and fails unless its tech tier equals techTier. Saves that already completed the milestone keep it and its recipes (a save records purchased schematics; the tier and cost only matter before purchase)."
     },
     "buildMenu": {
       "category": {

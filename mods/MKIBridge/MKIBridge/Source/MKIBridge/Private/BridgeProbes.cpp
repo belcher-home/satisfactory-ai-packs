@@ -337,6 +337,8 @@ namespace
         FString Kind; FString ActorId; FString ActorClassName; double NormalZ = 0.0;
         /** destructible | deposit | foliage when the player can remove what was hit, otherwise empty. */
         FString Removable;
+        /** With includeIdentity: what the hit actor, component and instance are (BridgeActorIdentityJson). */
+        TSharedPtr<FJsonObject> Identity;
     };
 
     const TCHAR* ColumnSurfaceKind(const AActor* Actor)
@@ -437,6 +439,7 @@ bool FMKIBridgeModule::HandleColumnProbe(const FHttpServerRequest& Request, cons
     bool bTraceComplex = false; Json->TryGetBoolField(TEXT("traceComplex"), bTraceComplex);
     bool bIncludeSurfaces = true; Json->TryGetBoolField(TEXT("includeSurfaces"), bIncludeSurfaces);
     bool bSkipRemovable = false; Json->TryGetBoolField(TEXT("skipRemovable"), bSkipRemovable);
+    bool bIncludeIdentity = false; Json->TryGetBoolField(TEXT("includeIdentity"), bIncludeIdentity);
     TMap<const UPrimitiveComponent*, bool> FoliageRemovable;
     TArray<FString> ExcludeIds; const TArray<TSharedPtr<FJsonValue>>* ExcludeValues = nullptr;
     if (Json->TryGetArrayField(TEXT("excludeIds"), ExcludeValues) && ExcludeValues)
@@ -548,6 +551,7 @@ bool FMKIBridgeModule::HandleColumnProbe(const FHttpServerRequest& Request, cons
                                 FColumnSurface Surface; Surface.Z = Embedded.ImpactPoint.Z; Surface.bFacesUp = Direction > 0; Surface.Kind = ColumnSurfaceKind(EmbeddedActor);
                                 Surface.ActorId = EmbeddedActor->GetName(); Surface.ActorClassName = EmbeddedActor->GetClass()->GetName(); Surface.NormalZ = Embedded.ImpactNormal.Z;
                                 if (EmbeddedRemovable) Surface.Removable = EmbeddedRemovable;
+                                if (bIncludeIdentity) Surface.Identity = BridgeActorIdentityJson(EmbeddedActor, Embedded.GetComponent(), Embedded.Item);
                                 Surfaces.Add(Surface); ++Recorded; ++EmbeddedHits;
                                 Start = Surface.Z - Direction * 1.0; Step = 50.0;
                                 continue;
@@ -561,6 +565,7 @@ bool FMKIBridgeModule::HandleColumnProbe(const FHttpServerRequest& Request, cons
                 FColumnSurface Surface; Surface.Z = Hit.ImpactPoint.Z; Surface.bFacesUp = Direction > 0; Surface.Kind = ColumnSurfaceKind(HitActor);
                 Surface.ActorId = HitActor ? HitActor->GetName() : FString(); Surface.ActorClassName = HitActor ? HitActor->GetClass()->GetName() : FString(); Surface.NormalZ = Hit.ImpactNormal.Z;
                 if (RemovableKind) Surface.Removable = RemovableKind;
+                if (bIncludeIdentity && HitActor) Surface.Identity = BridgeActorIdentityJson(HitActor, Hit.GetComponent(), Hit.Item);
                 Surfaces.Add(Surface); ++Recorded;
                 Start = Surface.Z - Direction * 1.0;
             }
@@ -600,6 +605,7 @@ bool FMKIBridgeModule::HandleColumnProbe(const FHttpServerRequest& Request, cons
                 Entry->SetNumberField(TEXT("z"), Surface.Z); Entry->SetStringField(TEXT("facing"), Surface.bFacesUp ? TEXT("up") : TEXT("down"));
                 Entry->SetStringField(TEXT("kind"), Surface.Kind); Entry->SetStringField(TEXT("actorId"), Surface.ActorId); Entry->SetStringField(TEXT("actorClass"), Surface.ActorClassName); Entry->SetNumberField(TEXT("normalZ"), Surface.NormalZ);
                 if (!Surface.Removable.IsEmpty()) Entry->SetStringField(TEXT("removable"), Surface.Removable);
+                if (Surface.Identity.IsValid()) Entry->SetObjectField(TEXT("identity"), Surface.Identity.ToSharedRef());
                 SurfaceValues.Add(MakeShared<FJsonValueObject>(Entry));
             }
             if (Surface.bFacesUp)

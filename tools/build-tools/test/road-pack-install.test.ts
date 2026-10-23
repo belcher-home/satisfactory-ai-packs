@@ -8,12 +8,13 @@ import {
   actionProblems, applyInstall, discoverPlugins, hashTree, inspectInstallation, latestArtifacts, planInstall, removalProblems, restoreInstall, verifyArtifact, RECEIPT_FILE,
 } from "../src/road-pack-install.js";
 import { installPathFromListing, PLUGIN_INSTALL_PATHS, type InstallablePlugin } from "../src/road-pack.js";
-import { bridgePluginDirectory, roadPackPluginDirectory } from "../src/workspace-paths.js";
+import { bridgePluginDirectory, roadPackPluginDirectory, toolsPluginDirectory } from "../src/workspace-paths.js";
 
 // Everything here runs in temporary fake game trees; no test reads or writes a real game installation.
 const sha256 = (data: string | Buffer) => createHash("sha256").update(data).digest("hex");
 const bridgeDescriptor = readFileSync(resolve(bridgePluginDirectory, "MKIBridge.uplugin"), "utf8");
 const roadPackDescriptor = readFileSync(resolve(roadPackPluginDirectory, "MKIRoads.uplugin"), "utf8");
+const toolsDescriptor = readFileSync(resolve(toolsPluginDirectory, "MKITools.uplugin"), "utf8");
 
 function write(path: string, content: string) {
   mkdirSync(dirname(path), { recursive: true });
@@ -34,6 +35,7 @@ function pluginFiles(plugin: InstallablePlugin, tag: string, descriptor?: string
     [`Binaries/Win64/FactoryGame${store}-${plugin}-Win64-Shipping.dll`, `dll ${store} ${tag}`],
   ]));
   if (plugin === "MKIRoads") return { "MKIRoads.uplugin": descriptor ?? roadPackDescriptor, ...containers, ...binaries };
+  if (plugin === "MKITools") return { "MKITools.uplugin": descriptor ?? toolsDescriptor, ...containers, ...binaries };
   return { "MKIBridge.uplugin": descriptor ?? bridgeDescriptor, ...containers, ...binaries };
 }
 
@@ -572,4 +574,34 @@ test("a plugin directory that does not resolve to itself under the game root is 
   assert.deepEqual(removalProblems(game, path, "MKIRoads"), [`${path} resolves to FactoryGame/Mods/SML/MKIRoads under the game root, not to itself; the installer never replaces or removes it`]);
   t.mock.method(realpathSync, "native", (target: string) => { if (resolve(target) === full) throw new Error("EACCES"); return native(target); });
   assert.deepEqual(removalProblems(game, path, "MKIRoads"), [`${path} resolves to (unresolvable) under the game root, not to itself; the installer never replaces or removes it`]);
+});
+
+test("MKI Tools is optional: an installation without it is complete, and one installed is checked like the others", (t) => {
+  const root = scratch(t);
+  const required = { "FactoryGame/Mods/MKIRoads": { plugin: "MKIRoads" as const, tag: "new" }, "FactoryGame/Mods/GameFeatures/MKIBridge": { plugin: "MKIBridge" as const, tag: "new" } };
+  const without = inspectInstallation(makeGame(join(root, "without"), required));
+  assert.deepEqual(without.problems, []);
+  assert.equal(without.plugins.MKITools.present, false);
+  const withTools = inspectInstallation(makeGame(join(root, "with"), { ...required, "FactoryGame/Mods/MKITools": { plugin: "MKITools", tag: "new" } }));
+  assert.deepEqual(withTools.problems, []);
+  assert.equal(withTools.plugins.MKITools.version, JSON.parse(toolsDescriptor).SemVersion);
+  // Negative: MKI Tools under Mods/GameFeatures does not mount there, and MKI Roads stays required.
+  const misplaced = inspectInstallation(makeGame(join(root, "misplaced"), { ...required, "FactoryGame/Mods/GameFeatures/MKITools": { plugin: "MKITools", tag: "new" } }));
+  assert.match(misplaced.problems.join("\n"), /MKITools is installed at FactoryGame\/Mods\/GameFeatures\/MKITools, but its containers mount at \.\.\/\.\.\/\.\.\/FactoryGame\/Mods\/MKITools\//);
+  const noRoads = inspectInstallation(makeGame(join(root, "noroads"), { "FactoryGame/Mods/GameFeatures/MKIBridge": { plugin: "MKIBridge", tag: "new" }, "FactoryGame/Mods/MKITools": { plugin: "MKITools", tag: "new" } }));
+  assert.match(noRoads.problems.join("\n"), /MKIRoads is not installed at FactoryGame\/Mods\/MKIRoads/);
+});
+
+test("an IoStore container with no asset (a plugin without content) mounts nothing, but one with assets at / still fails", () => {
+  // The MKI Tools 0.1.0 listing: its pak holds only config and mounts at the plugin, its IoStore container only a header.
+  const listing = [
+    'LogPakFile: Display: Listing MKIToolsFactoryGame-Windows.pak with mount point "../../../FactoryGame/Mods/MKITools/"',
+    'LogPakFile: Display: "AssetRegistry.bin" offset: 0, size: 104 bytes, sha1: 17FE, compression: None.',
+    "LogIoStore: Display: Mount point /",
+    'LogIoStore: Display: "<ContainerHeader>" offset: 0, size: 64 bytes, hash: 759e, compression: None.',
+    "LogIoStore: Display: 1 files (64 bytes).",
+  ];
+  assert.equal(installPathFromListing("MKITools", listing), "FactoryGame/Mods/MKITools");
+  const withAsset = [...listing.slice(0, 4), 'LogIoStore: Display: "Content/Rock.uasset" offset: 64, size: 10 bytes, hash: 1, compression: None.'];
+  assert.equal(installPathFromListing("MKITools", withAsset), undefined);
 });

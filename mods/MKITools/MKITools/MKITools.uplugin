@@ -1,0 +1,29 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "0.3.0",
+  "SemVersion": "0.3.0",
+  "GameVersion": ">=502094",
+  "FriendlyName": "MKI Tools",
+  "Description": "Tools for shaping the world and working in it. Options under Mods > MKI Tools: hand crafting and hand mining multipliers (1x to 10x the work per Craft Bench tick and the ore per swing, at the game's own pace), health regeneration speed (1x to 10x), a movement speed bonus (up to +100%), extra inventory slots (+10 per press, up to 500, grow-only), collecting nearby berries, nuts, bacon agaric, ground items, dismantle and death crates (5 to 50 m), short conveyor lifts anywhere, the chainsaw cutting boulders (for limestone) and its clearance radius (1x to 10x), and vegetation regrowth. Auto pickup: hold E for a second to turn the game's own auto pickup on or off (on keyboard and mouse nothing else turns it on); the game's \"Auto-Pickup Active\" label shows while it is on. Terrain dismantle mode: switch the dismantle gun to Terrain (as you switch to Blueprint) to remove level rocks, arches and cliffs that nothing else removes. They are hidden and lose their collision, never deleted, stay removed across saves and reloads, and can be restored. No refund.",
+  "Category": "Gameplay",
+  "CreatedBy": "MidKnight Industries",
+  "CanContainContent": true,
+  "IsBetaVersion": true,
+  "IsExperimentalVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "MKITools",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "SML",
+      "Enabled": true,
+      "SemVersion": "^3.12.0"
+    }
+  ]
+}

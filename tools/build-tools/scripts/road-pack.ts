@@ -1,12 +1,12 @@
 /**
  * Reproducible SDK workflow for the MKI Roads content mod and the MKI Bridge (issue #63).
  *
- *   npm run road-pack -- sync     [--plugins MKIRoads,MKIBridge]
+ *   npm run road-pack -- sync     [--plugins MKIRoads,MKIBridge,MKITools]
  *   npm run road-pack -- icons    [--update-golden]  # render the build-menu icons and compare them with the golden
  *   npm run road-pack -- editor   # compile the synced native modules for the SDK editor (FactoryEditor Development)
  *   npm run road-pack -- import   # icons + editor, build MKI Roads content in the SDK editor, then verify it in a fresh editor
  *   npm run road-pack -- verify
- *   npm run road-pack -- package  [--plugins MKIRoads,MKIBridge]
+ *   npm run road-pack -- package  [--plugins MKIRoads,MKIBridge,MKITools]
  *   npm run road-pack -- all      # sync, icons, editor, import + verify, package both plugins
  *
  * Environment: SML_ROOT (default D:/SatisfactoryModding/SatisfactoryModLoader), UE_ROOT (default
@@ -32,7 +32,7 @@ import {
 import { hashTree } from "../src/road-pack-install.js";
 import { packageProvenanceProblems, sdkInputFiles, treeDigest, type EditorProvenance } from "../src/road-pack-provenance.js";
 import {
-  bridgePluginDirectory, localPackagesDirectory, repositoryRoot, roadKitIconsPath, roadKitModulesPath, roadPackPluginDirectory, roadPackUnrealScriptsDirectory,
+  bridgePluginDirectory, localPackagesDirectory, repositoryRoot, roadKitIconsPath, roadKitModulesPath, roadPackPluginDirectory, roadPackUnrealScriptsDirectory, toolsPluginDirectory,
 } from "../src/workspace-paths.js";
 
 const args = process.argv.slice(2), command = args[0];
@@ -75,8 +75,10 @@ const PLUGINS: Record<InstallablePlugin, PluginSpec> = {
       "Content/MKIBridge.uasset": "8097a234c99b8b16f52f96c792e837f60e64aa7f3b041a9c42ce88a9102bffb1",
     },
   },
+  // MKI Tools ships one runtime module (the Terrain dismantle mode) and no content of its own.
+  MKITools: { name: "MKITools", source: toolsPluginDirectory, target: join(SML, "Mods", "MKITools"), mirrored: ["MKITools.uplugin", "Config", "Source"], build: true, sdkOnly: {} },
 };
-const selectedPlugins = () => (option("--plugins") ?? "MKIRoads,MKIBridge").split(",").map((name) => {
+const selectedPlugins = () => (option("--plugins") ?? "MKIRoads,MKIBridge,MKITools").split(",").map((name) => {
   const spec = PLUGINS[name.trim() as InstallablePlugin];
   if (!spec) throw new Error(`Unknown plugin ${name}; expected one of ${Object.keys(PLUGINS).join(", ")}`);
   return spec;
@@ -165,7 +167,8 @@ function buildEditor() {
   const batchFiles = join(UE, "Engine", "Build", "BatchFiles");
   const result = spawnSync("cmd.exe", ["/d", "/s", "/c", `""${join(batchFiles, "Build.bat")}" FactoryEditor Win64 Development "-Project=${PROJECT}" -WaitMutex -NoHotReloadFromIDE"`], { cwd: batchFiles, encoding: "utf8", maxBuffer: 1 << 30, windowsVerbatimArguments: true });
   writeFileSync(log, `${result.stdout ?? ""}${result.stderr ?? ""}`);
-  const binaries = Object.values(PLUGINS).map((spec) => join(spec.target, "Binaries", "Win64", `UnrealEditor-${spec.name}.dll`));
+  // Every plugin synced into the SDK is compiled; one never synced there (MKI Tools on an older SDK) is not expected.
+  const binaries = Object.values(PLUGINS).filter((spec) => existsSync(join(spec.target, `${spec.name}.uplugin`))).map((spec) => join(spec.target, "Binaries", "Win64", `UnrealEditor-${spec.name}.dll`));
   console.log(JSON.stringify({ command: "editor", exit: result.status, log, binaries: binaries.map((file) => ({ file, present: existsSync(file) })) }, null, 2));
   if (result.status !== 0 || binaries.some((file) => !existsSync(file))) throw new Error(`Editor build failed (exit ${result.status}); see ${log}`);
 }
@@ -329,7 +332,7 @@ try {
   else if (command === "verify") runEditor("verify");
   else if (command === "package") for (const spec of selectedPlugins()) packagePlugin(spec);
   else if (command === "all") { sync(); buildEditor(); runEditor("import"); runEditor("verify"); for (const spec of selectedPlugins()) packagePlugin(spec); }
-  else { console.error("Usage: npm run road-pack -- sync|icons|editor|import|verify|package|all [--plugins MKIRoads,MKIBridge] [--update-golden]"); process.exitCode = 2; }
+  else { console.error("Usage: npm run road-pack -- sync|icons|editor|import|verify|package|all [--plugins MKIRoads,MKIBridge,MKITools] [--update-golden]"); process.exitCode = 2; }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;

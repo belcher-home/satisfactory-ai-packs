@@ -1612,3 +1612,25 @@ test("road pieces are built of real 8 m foundation squares, dismantled and paint
   // Holograms ignore the squares of what they join or hold up.
   assert.match(read("Private/MKIRoadSupportsHologram.cpp"), /if \(mJunction\) mJunction->AddSelfAndTiles\(IgnoredActors\);/);
 });
+
+test("the MKI Roads milestone: named MKI Roads, Tier 3 beside Vehicular Transport, at the maintainer's cost", () => {
+  const { schematic } = roadKit().package;
+  assert.equal(schematic.displayName, "MKI Roads");
+  assert.equal(schematic.type, "milestone");
+  assert.equal(schematic.techTier, 3);
+  assert.deepEqual(schematic.cost, [
+    { item: "/Game/FactoryGame/Resource/Parts/Cement/Desc_Cement.Desc_Cement_C", amount: 400 },
+    { item: "/Game/FactoryGame/Resource/Parts/IronPlateReinforced/Desc_IronPlateReinforced.Desc_IronPlateReinforced_C", amount: 100 },
+    { item: "/Game/FactoryGame/Resource/Parts/ModularFrame/Desc_ModularFrame.Desc_ModularFrame_C", amount: 50 },
+  ]);
+  // The build time is the vanilla milestone's, read in the editor; the import fails unless that milestone shares the tier.
+  assert.deepEqual(schematic.timeLike, { folder: "/Game/FactoryGame/Schematics/Progression", displayName: "Vehicular Transport" });
+  const editor = readFileSync(join(roadPackDirectory, "unreal", "road_pack_editor.py"), "utf8");
+  assert.match(editor, /defaults\.set_editor_property\("mCost", \[unreal\.ItemAmount\(item_class=load_class\(item\), amount=amount\) for item, amount in milestone_cost\(\)\]\)/);
+  assert.match(editor, /if defaults\.get_editor_property\("mTechTier"\) != PACKAGE\["schematic"\]\["techTier"\]:\n\s+raise RuntimeError/);
+  assert.doesNotMatch(editor, /set_editor_property\("mCost", \[\]\)/, "the milestone is no longer free");
+  // Negative: a cost entry must be a base-game item class with a positive amount.
+  const document = JSON.parse(readFileSync(join(roadPackDirectory, "modules.json"), "utf8"));
+  document.package.schematic.cost = [{ item: "/MKIRoads/Thing.Thing_C", amount: 0 }];
+  assert.throws(() => parseRoadKitDocument(document));
+});
